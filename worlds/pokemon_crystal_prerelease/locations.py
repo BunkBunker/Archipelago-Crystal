@@ -10,7 +10,7 @@ from .fly import get_fly_regions, SILVER_CAVE_FLY_INDEX
 from .item_data import POKEDEX_OFFSET, POKEDEX_COUNT_OFFSET, GRASS_OFFSET, FLAG_ITEM_OFFSET, CANONICAL_ITEM_ID_MASK
 from .items import item_const_name_to_id
 from .options import Goal, DexsanityStarters, Grasssanity, RandomizeBugCatchingContest, WildEncounterMethodsRequired, \
-    PokemonSourceLogic, BattleTowerSanity, VanillaEventChains, RandomizeFlyUnlocks, JohtoOnly
+    PokemonSourceLogic, BattleTowerSanity, VanillaEventChains, RandomizeFlyUnlocks, JohtoOnly, Shopsanity
 from .pokemon import get_priority_dexsanity, get_excluded_dexsanity
 from .rematch_trainer_data import (
     all_rematch_locations
@@ -54,7 +54,9 @@ def create_locations(world: "PokemonCrystalWorld", regions: dict[str, Region]) -
         exclude.add("Pokegear")
     if not world.options.randomize_badges:
         exclude.add("Badge")
-    if not world.options.randomize_berry_trees and not world.options.remote_items:
+    remote_apricorn_trees_only = (world.options.remote_items and not world.options.randomize_berry_trees
+                                  and Shopsanity.APRICORNS in world.options.shopsanity.value)
+    if not world.options.randomize_berry_trees and not remote_apricorn_trees_only:
         exclude.add("BerryTree")
     if not world.options.saffron_gatehouse_tea:
         exclude.add("RequiresSaffronGatehouses")
@@ -86,8 +88,6 @@ def create_locations(world: "PokemonCrystalWorld", regions: dict[str, Region]) -
         always_include.add("ContestCombineSecondThird")
     elif world.options.randomize_bug_catching_contest == RandomizeBugCatchingContest.option_participate:
         always_include.add("ContestParticipate")
-
-    remote_apricorn_trees_only = world.options.remote_items and not world.options.randomize_berry_trees
 
     def is_vanilla_berry_tree(loc: str) -> bool:
         return (remote_apricorn_trees_only and "BerryTree" in data.locations[loc].tags

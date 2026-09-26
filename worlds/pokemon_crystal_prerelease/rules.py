@@ -995,6 +995,10 @@ def set_rules(world: "PokemonCrystalWorld") -> None:
     if not world.options.johto_only and world.options.randomize_phone_call_items:
         set_rule(get_entrance("REGION_OLIVINE_LIGHTHOUSE_2F -> REGION_OLIVINE_LIGHTHOUSE_2F:POWER"),
                  world.logic.can_phone_call_power())
+        if world.options.rematchsanity:
+            set_rule(get_location("Olivine Lighthouse 2F - Protein from Huey"),
+                     world.logic.can_phone_call()
+                     & HasAll("EVENT_CLEARED_RADIO_TOWER", "EVENT_BEAT_ELITE_FOUR", "EVENT_RESTORED_POWER_TO_KANTO"))
 
     if not johto_only():
         set_rule(get_entrance("REGION_OLIVINE_PORT -> REGION_OLIVINE_PORT:TICKET"), world.logic.ship_rule())
