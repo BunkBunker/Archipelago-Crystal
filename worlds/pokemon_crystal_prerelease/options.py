@@ -2613,7 +2613,8 @@ class RemoteItems(Toggle):
 
 class AlwaysUnlockFly(Toggle):
     """
-    Always unlock Fly destinations when entering a town, even if Randomize Fly Unlocks is enabled
+    Always unlock Fly destinations when entering a town, even if Randomize Fly Unlocks is enabled.
+    This does not work with Randomize Fly Destinations and is not considered by logic.
     """
     display_name = "Always Unlock Fly Destinations"
 
