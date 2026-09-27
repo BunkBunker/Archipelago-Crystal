@@ -6,6 +6,7 @@ import pkgutil
 import re
 from collections import defaultdict
 from collections.abc import Mapping
+from contextlib import contextmanager
 from dataclasses import dataclass
 from itertools import chain
 from types import MappingProxyType
@@ -393,6 +394,42 @@ class EntranceRandoMixin(_MixinBase):
             f"Pokemon Crystal: Entrance randomization failed for player {self.player} "
             f"({self.player_name}) after retries and {pin_rounds_run} vanilla pin rounds."
             f"{plando_hint} Pinned to vanilla: {sorted(pinned_names)}\n\n{last_error}")
+
+    @contextmanager
+    def _plando_items_placed_for_er(self):
+        """Temporarily lock forced single-item, single-location plando blocks so GER's
+        all-items state only gains those items by reaching their locations. Core places them for real later."""
+        placed = []
+        if self.options.randomize_entrances and not self.is_universal_tracker:
+            for block in self.multiworld.plando_item_blocks[self.player]:
+                if (block.force is not True or block.worlds != {self.player} or block.count["min"] < 1
+                        or len(block.items) != 1 or len(block.resolved_locations) != 1
+                        or {"early_locations", "non_early_locations"} & set(block.locations)):
+                    continue
+                location = block.resolved_locations[0]
+                if location.player != self.player or location.item is not None or location.address is None:
+                    continue
+                item_name = block.items[0]
+                index = next((i for i, item in enumerate(self.multiworld.itempool)
+                              if item.player == self.player and item.name == item_name), None) \
+                    if block.from_pool else None
+                item = self.multiworld.itempool[index] if index is not None else self.create_item(item_name)
+                if not location.can_fill(self.multiworld.state, item, False):
+                    continue
+                if index is not None:
+                    self.multiworld.itempool.pop(index)
+                location.place_locked_item(item)
+                placed.append((location, index))
+        try:
+            yield
+        finally:
+            for location, index in reversed(placed):
+                item = location.item
+                location.item = None
+                location.locked = False
+                item.location = None
+                if index is not None:
+                    self.multiworld.itempool.insert(index, item)
 
     def _check_sphere_1_capacity(self) -> None:
         unfilled = [loc for loc in self.multiworld.get_unfilled_locations(self.player) if loc.address is not None]

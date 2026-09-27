@@ -656,7 +656,8 @@ class PokemonCrystalWorld(EntranceRandoMixin, World):
         if not self.is_universal_tracker:
             verify_hm_accessibility(self)
 
-        self._shuffle_entrances()
+        with self._plando_items_placed_for_er():
+            self._shuffle_entrances()
         if self.is_universal_tracker:
             self._apply_friendly_entrance_names()
 
