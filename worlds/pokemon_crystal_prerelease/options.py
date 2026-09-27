@@ -1511,8 +1511,8 @@ class RandomizeStaticPokemon(Choice):
 
 class StaticBlocklist(PokemonSet):
     """
-    These Pokemon will not appear as static overworld encounters, gift eggs or gift Pokemon
-    Does nothing if static Pokemon are not randomized
+    These Pokemon will not appear as static overworld encounters, gift eggs, gift Pokemon or received trade Pokemon
+    Only applies to static Pokemon or received trade Pokemon that are randomized
     Blocklists are best effort, other constraints may cause them to be ignored
     """
     display_name = "Static Blocklist"
@@ -1544,6 +1544,7 @@ class UniqueStaticPokemon(Choice):
 class RandomizeTrades(Choice):
     """
     Randomizes species of in-game trades
+    Received species respect the Static Blocklist
     """
     display_name = "Randomize Trades"
     default = 0

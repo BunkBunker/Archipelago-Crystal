@@ -176,12 +176,12 @@ def randomize_trade_received_pokemon(world: "PokemonCrystalWorld"):
     if world.options.randomize_trades.value not in (RandomizeTrades.option_received,
                                                     RandomizeTrades.option_both): return
 
-    blocklist = getattr(world, "unique_static_wild_block", set()) or None
+    blocklist = world.options.static_blocklist.get_ids(world) | getattr(world, "unique_static_wild_block", set())
     for trade_id, trade in world.generated_trades.items():
         received_pokemon = trade.received_pokemon
         world.generated_trades[trade_id] = replace(
             trade,
-            received_pokemon=get_random_pokemon(world, blocklist=blocklist),
+            received_pokemon=get_random_pokemon(world, blocklist=blocklist or None),
             held_item=get_random_filler_item(world) if received_pokemon != "ABRA" else "TM_9"
         )
 
