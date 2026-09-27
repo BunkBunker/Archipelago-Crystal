@@ -615,8 +615,7 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
                     "key": pokedex_seen_key,
                     "default": [],
                     "want_reply": ctx.items_handling & 0b010,
-                    "operations": [{"operation": "update" if ctx.items_handling & 0b010 else "replace",
-                                    "value": list(local_seen_pokemon)}, ]
+                    "operations": [{"operation": "update", "value": list(local_seen_pokemon)}, ]
                 })
 
             if local_caught_pokemon != self.local_caught_pokemon:
@@ -851,8 +850,7 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
                     "key": f"pokemon_crystal_signs_{ctx.team}_{ctx.slot}",
                     "default": [],
                     "want_reply": ctx.items_handling & 0b010,
-                    "operations": [{"operation": "update" if ctx.items_handling & 0b010 else "replace",
-                                    "value": list(local_seen_signs)}, ]
+                    "operations": [{"operation": "update", "value": list(local_seen_signs)}, ]
                 }])
                 self.local_seen_signs = local_seen_signs
 
