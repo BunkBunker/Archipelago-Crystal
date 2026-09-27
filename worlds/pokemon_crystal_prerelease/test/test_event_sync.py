@@ -5,13 +5,10 @@ from ..client import PokemonCrystalClient, EVENT_BYTES
 from ..client_event_sync import (
     SYNC_EVENT_FLAGS,
     SYNC_EVENTS_FLAG_MAP,
-    SYNC_EVENTS_FLAG_MAP_WITH_E4,
     SYNC_LAYOUT,
-    SYNC_LAYOUT_WITH_E4,
-    SYNC_BIT_GROUPS,
     E4_DOOR_SYNC_EVENT_FLAGS,
-    E4_DOOR_SYNC_BIT_BASE,
-    build_sync_layout,
+    E4_DOOR_SYNC_FLAG_MAP,
+    E4_DOOR_SYNC_LAYOUT,
     SYNC_GOAL_FLAGS,
     SYNC_GOAL_FLAG_MAP,
     detect_sync_events,
@@ -48,6 +45,10 @@ def make_client():
 
 def sync_key(team=0, slot=1):
     return f"pokemon_crystal_sync_events_{team}_{slot}"
+
+
+def e4_door_sync_key(team=0, slot=1):
+    return f"pokemon_crystal_e4_door_sync_events_{team}_{slot}"
 
 
 def sync_goal_key(team=0, slot=1):
@@ -280,51 +281,32 @@ class TestE4DoorSyncFlags(unittest.TestCase):
         for event_name in E4_DOOR_SYNC_EVENT_FLAGS:
             self.assertIn(event_name, data.event_flags)
 
-    def test_extended_layout_preserves_base_bit_positions(self):
-        """The base group's bits must be identical with and without the E4 group present."""
-        for event, bit in SYNC_LAYOUT.items():
-            self.assertEqual(SYNC_LAYOUT_WITH_E4[event], bit)
-
-    def test_e4_bits_sit_at_reserved_base(self):
-        """E4 bits are pinned to their own range, so the base group can grow freely."""
-        for offset, event in enumerate(E4_DOOR_SYNC_EVENT_FLAGS):
-            self.assertEqual(SYNC_LAYOUT_WITH_E4[event], E4_DOOR_SYNC_BIT_BASE + offset)
-
-    def test_base_group_fits_in_reserved_range(self):
-        self.assertLessEqual(len(SYNC_EVENT_FLAGS), E4_DOOR_SYNC_BIT_BASE)
-
-    def test_overlapping_groups_rejected(self):
-        with self.assertRaises(ValueError):
-            build_sync_layout((0, ["EVENT_BEAT_FALKNER", "EVENT_BEAT_BUGSY"]),
-                              (1, ["EVENT_BEAT_WHITNEY"]))
-
     def test_no_overlap_with_base_list(self):
         self.assertEqual(set(SYNC_EVENT_FLAGS) & set(E4_DOOR_SYNC_EVENT_FLAGS), set())
 
-    def test_no_duplicates(self):
-        self.assertEqual(len(SYNC_LAYOUT_WITH_E4), sum(len(flags) for _, flags in SYNC_BIT_GROUPS))
-
     def test_round_trip(self):
         fb = flag_bytes_with_events(E4_DOOR_SYNC_EVENT_FLAGS)
-        detected = detect_sync_events(fb, SYNC_EVENTS_FLAG_MAP_WITH_E4)
-        bitfield = encode_sync_bitfield(detected, SYNC_LAYOUT_WITH_E4)
-        decoded = apply_remote_sync_events(bytearray(EVENT_BYTES), bitfield, SYNC_LAYOUT_WITH_E4)
-        re_detected = detect_sync_events(decoded, SYNC_EVENTS_FLAG_MAP_WITH_E4)
-        for event in SYNC_LAYOUT_WITH_E4:
-            self.assertEqual(re_detected[event], event in E4_DOOR_SYNC_EVENT_FLAGS,
-                             f"Round-trip mismatch for {event}")
+        bitfield = encode_sync_bitfield(detect_sync_events(fb, E4_DOOR_SYNC_FLAG_MAP), E4_DOOR_SYNC_LAYOUT)
+        self.assertEqual(bitfield, (1 << len(E4_DOOR_SYNC_EVENT_FLAGS)) - 1)
+        decoded = apply_remote_sync_events(bytearray(EVENT_BYTES), bitfield, E4_DOOR_SYNC_LAYOUT)
+        self.assertTrue(all(detect_sync_events(decoded, E4_DOOR_SYNC_FLAG_MAP).values()))
+        self.assertFalse(any(detect_sync_events(decoded).values()))
 
-    def test_base_bitfield_decodes_identically_with_extended_list(self):
-        """A bitfield produced by a base-list client must decode the same under the extended list."""
-        fb = flag_bytes_with_events(SYNC_EVENT_FLAGS)
-        bitfield = encode_sync_bitfield(detect_sync_events(fb), SYNC_LAYOUT)
-        decoded = apply_remote_sync_events(bytearray(EVENT_BYTES), bitfield, SYNC_LAYOUT_WITH_E4)
-        for event in SYNC_EVENT_FLAGS:
-            eid = data.event_flags[event]
-            self.assertTrue(decoded[eid // 8] & (1 << (eid % 8)), f"{event} not set")
-        for event in E4_DOOR_SYNC_EVENT_FLAGS:
-            eid = data.event_flags[event]
-            self.assertFalse(decoded[eid // 8] & (1 << (eid % 8)), f"{event} wrongly set")
+    def test_base_events_ignored(self):
+        detected = detect_sync_events(flag_bytes_with_events(SYNC_EVENT_FLAGS), E4_DOOR_SYNC_FLAG_MAP)
+        self.assertFalse(any(detected.values()))
+
+    def test_retrieved_sets_remote(self):
+        client = make_client()
+        client.on_package(make_ctx(), "Retrieved", {"keys": {e4_door_sync_key(): 0b101, sync_key(): 0b11}})
+        self.assertEqual(client.remote_e4_door_sync_events, 0b101)
+        self.assertEqual(client.remote_sync_events, 0b11)
+
+    def test_set_reply_sets_remote(self):
+        client = make_client()
+        client.on_package(make_ctx(), "SetReply", {"key": e4_door_sync_key(), "value": 0xF0})
+        self.assertEqual(client.remote_e4_door_sync_events, 0xF0)
+        self.assertEqual(client.remote_sync_events, 0)
 
 
 class TestSyncGoalFlagData(unittest.TestCase):

@@ -1,8 +1,4 @@
-"""Co-op event flag syncing between players sharing a slot.
-
-Each sync group owns a fixed bitfield range so a group can grow without
-shifting the bit positions of the others.
-"""
+"""Co-op event flag syncing between players sharing a slot."""
 
 from .data import data
 
@@ -82,6 +78,8 @@ SYNC_EVENT_FLAGS = [
     "EVENT_TALKED_TO_MOM_AFTER_MYSTERY_EGG_QUEST",
 
     "EVENT_DECIDED_TO_HELP_LANCE",
+
+    "EVENT_USED_THE_CARD_KEY_IN_THE_RADIO_TOWER",
 ]
 
 E4_DOOR_SYNC_EVENT_FLAGS = [
@@ -95,36 +93,16 @@ E4_DOOR_SYNC_EVENT_FLAGS = [
     "EVENT_KARENS_ROOM_EXIT_OPEN",
 ]
 
-# Each group owns a fixed bitfield range so a group can grow without shifting the others.
-# Groups are append-only within their own range and must not outgrow the next base.
-SYNC_BIT_BASE = 0
-E4_DOOR_SYNC_BIT_BASE = 64
-SYNC_BIT_GROUPS = [
-    (SYNC_BIT_BASE, SYNC_EVENT_FLAGS),
-    (E4_DOOR_SYNC_BIT_BASE, E4_DOOR_SYNC_EVENT_FLAGS),
-]
+def build_sync_layout(flags: list[str]) -> dict[str, int]:
+    """Map each sync flag name to its bitfield position."""
+    return {flag_name: bit for bit, flag_name in enumerate(flags)}
 
 
-def build_sync_layout(*groups: tuple[int, list[str]]) -> dict[str, int]:
-    """Map each sync flag name to its fixed bitfield position."""
-    layout = {}
-    taken = {}
-    for base, flags in groups:
-        for offset, flag_name in enumerate(flags):
-            bit = base + offset
-            if bit in taken:
-                raise ValueError(f"Sync bit {bit} claimed by both {taken[bit]} and {flag_name}; "
-                                 f"a sync group has outgrown its reserved range")
-            taken[bit] = flag_name
-            layout[flag_name] = bit
-    return layout
-
-
-SYNC_LAYOUT = build_sync_layout(SYNC_BIT_GROUPS[0])
-SYNC_LAYOUT_WITH_E4 = build_sync_layout(*SYNC_BIT_GROUPS)
-
+SYNC_LAYOUT = build_sync_layout(SYNC_EVENT_FLAGS)
 SYNC_EVENTS_FLAG_MAP = {data.event_flags[event]: event for event in SYNC_LAYOUT}
-SYNC_EVENTS_FLAG_MAP_WITH_E4 = {data.event_flags[event]: event for event in SYNC_LAYOUT_WITH_E4}
+
+E4_DOOR_SYNC_LAYOUT = build_sync_layout(E4_DOOR_SYNC_EVENT_FLAGS)
+E4_DOOR_SYNC_FLAG_MAP = {data.event_flags[event]: event for event in E4_DOOR_SYNC_LAYOUT}
 
 SYNC_GOAL_FLAGS = [
     "EVENT_BEAT_ELITE_FOUR",
@@ -146,7 +124,7 @@ SYNC_GOAL_FLAGS = [
 ]
 
 SYNC_GOAL_FLAG_MAP = {data.event_flags[event]: event for event in SYNC_GOAL_FLAGS}
-SYNC_GOAL_LAYOUT = build_sync_layout((0, SYNC_GOAL_FLAGS))
+SYNC_GOAL_LAYOUT = build_sync_layout(SYNC_GOAL_FLAGS)
 
 
 def detect_sync_events(flag_bytes: bytes, flag_map: dict[int, str] = SYNC_EVENTS_FLAG_MAP) -> dict[str, bool]:

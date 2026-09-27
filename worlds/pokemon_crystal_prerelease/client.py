@@ -14,7 +14,7 @@ from .client_energy_link import ENERGY_LINK_NONE, handle_energy_link
 from .client_tracker_events import BITFLAG_STORAGES, INVERTED_TRACKER_FLAGS
 from .client_trap_link import handle_trap_link_setting, send_trap_link, resolve_trap_link_id
 from .client_wonder_trade import WonderTradeMixin
-from .client_event_sync import (SYNC_EVENTS_FLAG_MAP, SYNC_EVENTS_FLAG_MAP_WITH_E4, SYNC_LAYOUT, SYNC_LAYOUT_WITH_E4,
+from .client_event_sync import (E4_DOOR_SYNC_FLAG_MAP, E4_DOOR_SYNC_LAYOUT,
                                 SYNC_GOAL_FLAGS, detect_sync_events, encode_sync_bitfield, apply_remote_sync_events,
                                 detect_sync_goal_events, encode_sync_goal_bitfield)
 from .data import data, load_json_data, is_flag_backed_warp
@@ -96,6 +96,8 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
     remote_unown_dex: list[int]
     local_sync_events: dict[str, bool]
     remote_sync_events: int
+    local_e4_door_sync_events: dict[str, bool]
+    remote_e4_door_sync_events: int
     local_sync_goal_events: dict[str, bool]
     remote_sync_goal_events: int
     local_unlocked_unowns: int
@@ -131,6 +133,8 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
         self.remote_unown_dex = list()
         self.local_sync_events = dict()
         self.remote_sync_events = 0
+        self.local_e4_door_sync_events = dict()
+        self.remote_e4_door_sync_events = 0
         self.local_sync_goal_events = dict()
         self.remote_sync_goal_events = 0
         self.local_unlocked_unowns = 0
@@ -255,6 +259,7 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
         pokedex_caught_key = f"pokemon_crystal_caught_pokemon_{ctx.team}_{ctx.slot}"
         unown_dex_key = f"pokemon_crystal_unowns_{ctx.team}_{ctx.slot}"
         sync_events_key = f"pokemon_crystal_sync_events_{ctx.team}_{ctx.slot}"
+        e4_door_sync_events_key = f"pokemon_crystal_e4_door_sync_events_{ctx.team}_{ctx.slot}"
         sync_goal_events_key = f"pokemon_crystal_sync_goal_events_{ctx.team}_{ctx.slot}"
         unlocked_unowns_key = f"pokemon_crystal_unlocked_unowns_{ctx.team}_{ctx.slot}"
         warps_key = f"pokemon_crystal_warps_{ctx.team}_{ctx.slot}"
@@ -264,7 +269,8 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
         if not self.notify_setup_complete:
             if ctx.items_handling & 0b010:
                 ctx.set_notify(pokedex_caught_key, pokedex_seen_key, unown_dex_key, sync_events_key,
-                               sync_goal_events_key, unlocked_unowns_key, battle_tower_key, fly_unlocks_key)
+                               e4_door_sync_events_key, sync_goal_events_key, unlocked_unowns_key, battle_tower_key,
+                               fly_unlocks_key)
             ctx.set_notify(warps_key)
             ctx.set_notify(f"EnergyLink{ctx.team}")
             await bizhawk.write(ctx.bizhawk_ctx,
@@ -313,13 +319,8 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
 
         self.grass_location_mapping = ctx.slot_data["grass_location_mapping"]
 
-        if (ctx.slot_data["lance_requires_elite_four"]
-                and "Pokemon League" in ctx.slot_data["randomize_entrances"]):
-            sync_layout = SYNC_LAYOUT_WITH_E4
-            sync_events_flag_map = SYNC_EVENTS_FLAG_MAP_WITH_E4
-        else:
-            sync_layout = SYNC_LAYOUT
-            sync_events_flag_map = SYNC_EVENTS_FLAG_MAP
+        sync_e4_doors = (ctx.slot_data["lance_requires_elite_four"]
+                         and "Pokemon League" in ctx.slot_data["randomize_entrances"])
 
         if not self.commands_enabled:
             self.commands_enabled = True
@@ -501,7 +502,8 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
                         if event_id in goal_flags_cleared:
                             goal_flags_cleared[event_id] = True
 
-            local_sync_events = detect_sync_events(flag_bytes, sync_events_flag_map)
+            local_sync_events = detect_sync_events(flag_bytes)
+            local_e4_door_sync_events = detect_sync_events(flag_bytes, E4_DOOR_SYNC_FLAG_MAP)
 
             for byte_i, byte in enumerate(pokedex_caught_bytes):
                 for i in range(8):
@@ -765,7 +767,7 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
                     setattr(self, attr_name, local_dict)
 
             if local_sync_events != self.local_sync_events and ctx.items_handling & 0b010:
-                event_bitfield = encode_sync_bitfield(local_sync_events, sync_layout)
+                event_bitfield = encode_sync_bitfield(local_sync_events)
 
                 await ctx.send_msgs([{
                     "cmd": "Set",
@@ -775,6 +777,19 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
                     "operations": [{"operation": "or", "value": event_bitfield}],
                 }])
                 self.local_sync_events = local_sync_events
+
+            if (sync_e4_doors and local_e4_door_sync_events != self.local_e4_door_sync_events
+                    and ctx.items_handling & 0b010):
+                e4_door_bitfield = encode_sync_bitfield(local_e4_door_sync_events, E4_DOOR_SYNC_LAYOUT)
+
+                await ctx.send_msgs([{
+                    "cmd": "Set",
+                    "key": e4_door_sync_events_key,
+                    "default": 0,
+                    "want_reply": True,
+                    "operations": [{"operation": "or", "value": e4_door_bitfield}],
+                }])
+                self.local_e4_door_sync_events = local_e4_door_sync_events
 
             local_sync_goal_events = detect_sync_goal_events(flag_bytes)
             if local_sync_goal_events != self.local_sync_goal_events and ctx.items_handling & 0b010:
@@ -919,7 +934,10 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
                      (data.ram_addresses["wUnownDex"], unown_dex_bytes, "WRAM")]
                 )
 
-                synced_event_bytes = apply_remote_sync_events(flag_bytes, self.remote_sync_events, sync_layout)
+                synced_event_bytes = apply_remote_sync_events(flag_bytes, self.remote_sync_events)
+                if sync_e4_doors:
+                    synced_event_bytes = apply_remote_sync_events(synced_event_bytes, self.remote_e4_door_sync_events,
+                                                                  E4_DOOR_SYNC_LAYOUT)
 
                 sync_event_writes = []
                 sync_event_guards = []
@@ -1030,6 +1048,9 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
                 if f"pokemon_crystal_sync_events_{ctx.team}_{ctx.slot}" in args["keys"]:
                     remote_sync_events = args["keys"][f"pokemon_crystal_sync_events_{ctx.team}_{ctx.slot}"]
                     self.remote_sync_events = remote_sync_events if remote_sync_events else 0
+                if f"pokemon_crystal_e4_door_sync_events_{ctx.team}_{ctx.slot}" in args["keys"]:
+                    remote_e4_door_sync_events = args["keys"][f"pokemon_crystal_e4_door_sync_events_{ctx.team}_{ctx.slot}"]
+                    self.remote_e4_door_sync_events = remote_e4_door_sync_events if remote_e4_door_sync_events else 0
                 if f"pokemon_crystal_sync_goal_events_{ctx.team}_{ctx.slot}" in args["keys"]:
                     remote_sync_goal_events = args["keys"][f"pokemon_crystal_sync_goal_events_{ctx.team}_{ctx.slot}"]
                     self.remote_sync_goal_events = remote_sync_goal_events if remote_sync_goal_events else 0
@@ -1046,6 +1067,8 @@ class PokemonCrystalClient(WonderTradeMixin, BizHawkClient):
                 self.remote_unown_dex = args.get("value", [])
             elif args["key"] == f"pokemon_crystal_sync_events_{ctx.team}_{ctx.slot}":
                 self.remote_sync_events = args.get("value", 0)
+            elif args["key"] == f"pokemon_crystal_e4_door_sync_events_{ctx.team}_{ctx.slot}":
+                self.remote_e4_door_sync_events = args.get("value", 0)
             elif args["key"] == f"pokemon_crystal_sync_goal_events_{ctx.team}_{ctx.slot}":
                 self.remote_sync_goal_events = args.get("value", 0)
             elif args["key"] == f"pokemon_crystal_unlocked_unowns_{ctx.team}_{ctx.slot}":
