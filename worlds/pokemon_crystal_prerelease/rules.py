@@ -1522,6 +1522,7 @@ def set_rules(world: "PokemonCrystalWorld") -> None:
 
         # Saffron
         set_rule(get_location("Copycat's House - Pass from Copycat"), Has("Lost Item"))
+        set_rule(get_location("EVENT_MET_COPYCAT_FOUND_OUT_ABOUT_LOST_ITEM"), Has("EVENT_RESTORED_POWER_TO_KANTO"))
 
         set_rule(get_entrance("REGION_SAFFRON_MAGNET_TRAIN_STATION -> REGION_GOLDENROD_MAGNET_TRAIN_STATION"),
                  world.logic.magnet_train_rule())
