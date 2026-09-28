@@ -218,7 +218,6 @@ class PokemonCrystalLogic:
     badge_items: dict[str, str]
     hm_badge_requirements_johto: dict[str, tuple]
     hm_badge_requirements_kanto: dict[str, tuple]
-    pokemon_hm_use: dict[str, list[str]]
     gym_events: dict[str, str]
 
     map_card_fly_unlocks: tuple
