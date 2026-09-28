@@ -111,6 +111,20 @@ class PokemonCrystalWebWorld(WebWorld):
         "setup_en.md",
         "setup/en",
         ["AliceMousie", "gerbiljames"]
+    ), Tutorial(
+        "Multiworld Setup Guide",
+        "Eine Anleitung zum Spielen von Pokémon Kristall mit Archipelago.",
+        "Deutsch",
+        "setup_de.md",
+        "setup/de",
+        ["palex00"]
+    ), Tutorial(
+        "Multiworld Setup Guide",
+        "Poradnik do grania w Pokémon Crystal z Archipelago.",
+        "Polski",
+        "setup_pl.md",
+        "setup/pl",
+        ["palex00"]
     )]
 
     option_groups = OPTION_GROUPS
