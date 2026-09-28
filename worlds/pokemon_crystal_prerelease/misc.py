@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 AFRICAN_COUNTRIES = (
-    "Mali", "Chad", "Togo", "Egypt", "Congo", "Kenya", "Sudan", "Ghana", "Benin", "Libya", "Congo", "Gabon", "Uganda",
+    "Mali", "Chad", "Togo", "Egypt", "Congo", "Kenya", "Sudan", "Ghana", "Benin", "Libya", "Gabon", "Uganda",
     "Angola", "Malawi", "Zambia", "Guinea", "Rwanda", "Gambia", "Nigeria", "Algeria", "Morocco", "Somalia", "Senegal",
     "Burundi", "Tunisia", "Liberia", "Eritrea", "Namibia", "Lesotho", "Reunion", "Comoros", "Ethiopia", "Tanzania",
     "Cameroon", "Zimbabwe", "Botswana", "Eswatini", "Djibouti", "S. Africa", "Mauritius", "Mozambique", "Madagascar",
