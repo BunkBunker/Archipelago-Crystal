@@ -209,7 +209,7 @@ class PokemonCrystalWorld(EntranceRandoMixin, World):
     static_name_list: list[str]
     static_level_list: list[int]
     encounter_region_name_list: list[str]
-    encounter_region_levels_list = list[int]
+    encounter_region_levels_list: list[int]
 
     shop_locations_by_spheres: list[list[PokemonCrystalLocation]]
 
