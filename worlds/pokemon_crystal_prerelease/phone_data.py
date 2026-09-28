@@ -191,6 +191,7 @@ def template_call_remote(location: Location, world):
         "POKEMON PINBALL": "KANTO GAME CORNER",
         "POKEMON MYSTERY DUNGEON EXPLORERS OF SKY": "GRASS CONTINENT",
         "POKEMON RANGER (QUEST)": "FIORE",
+        "POKEPARK": "the <POKE>PARK",
     }
 
     raw_game_name = location.item.game.upper()
