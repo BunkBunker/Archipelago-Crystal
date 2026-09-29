@@ -712,15 +712,18 @@ class PokemonCrystalGameSetting:
     values: Mapping[str, int]
     default: int
 
-    def set_option_byte(self, option_selection: str | None, option_bytes: bytearray):
+    @staticmethod
+    def normalize(option_selection: Any) -> Any:
         if option_selection is True:
-            option_selection = "on"
-        elif option_selection is False:
-            option_selection = "off"
-        elif isinstance(option_selection, int):
-            option_selection = str(option_selection)
+            return "on"
+        if option_selection is False:
+            return "off"
+        if isinstance(option_selection, int):
+            return str(option_selection)
+        return option_selection
 
-        value = self.values.get(option_selection, self.default)
+    def set_option_byte(self, option_selection: str | None, option_bytes: bytearray):
+        value = self.values.get(self.normalize(option_selection), self.default)
         mask = ((self.length * 2) - 1) << self.offset
         value = (value << self.offset) & mask
 

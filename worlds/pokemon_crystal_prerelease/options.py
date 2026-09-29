@@ -2694,7 +2694,7 @@ class GameOptions(OptionDict):
     local_item_notification: text/sound/none - Sets how Trainersanity, Dex(count)sanity and Grasssanity locations show item notifications
     low_hp_beep: on/off - Sets whether the low HP beep is played in battle
     menu_account: on/off - Sets whether extra information is shown on the Start menu
-    more_uncaught_encounters: on/off - Sets whether wild encounters of Pokemon you have not caught are more likely
+    more_uncaught_encounters: off/on - Sets whether wild encounters of Pokemon you have not caught are more likely
     music: on/off - Sets whether music will play
     poison_flicker: on/off - Sets whether the overworld poison flash effect is played
     rods_always_work: off/on - Sets whether the fishing rods always succeed
@@ -2760,7 +2760,21 @@ class GameOptions(OptionDict):
     def verify(self, world: Type[World], player_name: str, plando_options: PlandoOptions) -> None:
         for key, value in self.value.items():
             if not isinstance(value, Hashable):
-                raise OptionError(f"Invalid game option value for {key}.")
+                raise OptionError(f"Invalid game option value for {key}: {value}")
+            if key == "tracker_slot":
+                if isinstance(value, bool) or not isinstance(value, int | str) or not str(value).isdigit() \
+                        or not 0 <= int(value) <= 255:
+                    raise OptionError(f"Invalid game option value for {key}: {value}. Must be 0-255.")
+                continue
+            setting = data.game_settings.get(key)
+            if setting is None or key.startswith("_"):
+                continue
+            valid_values = list(setting.values)
+            if key in ("text_frame", "time_of_day"):
+                valid_values.append("random")
+            if setting.normalize(value) not in valid_values:
+                raise OptionError(f"Invalid game option value for {key}: {value}. "
+                                  f"Valid values: {', '.join(valid_values)}")
 
 
 class FieldMoveMenuOrder(OptionList):
