@@ -5102,6 +5102,7 @@
       "FRUITTREE_ROUTE_31"
     ],
     "events": [
+      "EVENT_TALKED_TO_MOM_AFTER_MYSTERY_EGG_QUEST",
       "EVENT_GAVE_KENYA"
     ],
     "signs": [
