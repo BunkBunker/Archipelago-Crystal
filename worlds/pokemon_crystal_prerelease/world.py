@@ -16,7 +16,7 @@ from .data import PokemonData, TrainerData, MiscData, TMHMData, data as crystal_
     EvolutionType, TypeData, BugContestEncounter, FlypointWarp, friendly_entrance_name, \
     FRIENDLY_CONNECTION_NAME_OVERRIDES, internal_entrance_name, OUTDOOR_ENVIRONMENTS
 from .evolution import randomize_evolution, evolution_in_logic
-from .fly import get_free_fly_locations, randomize_fly_destinations
+from .fly import get_free_fly_locations, randomize_fly_destinations, fly_flag_index
 from .item_data import POKEDEX_OFFSET
 from .items import PokemonCrystalItem, create_item_label_to_code_map, ITEM_GROUPS, \
     item_const_name_to_id, item_const_name_to_label, get_classification_override, get_random_filler_item, \
@@ -1007,14 +1007,14 @@ class PokemonCrystalWorld(EntranceRandoMixin, World):
             if not self.options.randomize_fly_destinations:
                 spoiler_handle.write(f"Free Fly Location: {self.free_fly_location.name}\n")
             else:
-                spoiler_handle.write(f"Free Fly Location: Fly Unlock {self.free_fly_location.id}\n")
+                spoiler_handle.write(f"Free Fly Location: Fly Unlock {fly_flag_index(self, self.free_fly_location) + 1}\n")
 
         if self.options.free_fly_location.value in (FreeFlyLocation.option_free_fly_and_map_card,
                                                     FreeFlyLocation.option_map_card):
             if not self.options.randomize_fly_destinations:
                 spoiler_handle.write(f"Map Card Fly Location: {self.map_card_fly_location.name}\n")
             else:
-                spoiler_handle.write(f"Map Card Fly Location: Fly Unlock {self.map_card_fly_location.id}\n")
+                spoiler_handle.write(f"Map Card Fly Location: Fly Unlock {fly_flag_index(self, self.map_card_fly_location) + 1}\n")
 
         if self.options.randomize_starting_town:
             spoiler_handle.write(f"Starting Town: {self.starting_town.name}\n")

@@ -11,7 +11,7 @@ from .logic_rules import HasNPokemon, HasDexCount, HasSpeciesDex, HasRequestSlot
 from .data import data, EvolutionType, EvolutionData, FishingRodType, EncounterKey, LogicalAccess, EncounterType, \
     FishTimeOfDay
 from .evolution import evolution_location_name
-from .fly import get_fly_regions, SILVER_CAVE_FLY_INDEX
+from .fly import get_fly_regions
 from .items import item_const_name_to_label
 from .options import Goal, JohtoOnly, Route32Condition, UndergroundsRequirePower, Route2Access, \
     BlackthornDarkCaveAccess, NationalParkAccess, Route22AccessRequirement, Route3Access, BreedingMethodsRequired, \
@@ -20,7 +20,7 @@ from .options import Goal, JohtoOnly, Route32Condition, UndergroundsRequirePower
     Route44AccessRequirement, RandomizeBadges, RadioTowerRequirement, PokemonCrystalOptions, Shopsanity, \
     RequireItemfinder, Route42Access, RedGyaradosAccess, PhoneCallMode, Route30Access, \
     SouthKantoCondition, RemoveBadgeRequirement, WildEncounterMethodsRequired, SaffronGatehouseTea, \
-    VanillaEventChains, RandomizeFlyUnlocks, Route12Access
+    VanillaEventChains, Route12Access
 from .pokemon import add_hm_compatibility, get_chamber_event_for_unown
 from .pokemon_data import ALL_UNOWN, SWARM_REGISTRATIONS
 from .rematch_trainer_data import REMATCH_TRAINERS, SCALING_SUFFIX, rematch_location_name
@@ -566,27 +566,19 @@ def set_rules(world: "PokemonCrystalWorld") -> None:
         map_card_dest = _get_fly_dest_region(world, world.map_card_fly_location)
         add_rule(get_entrance(f"Free Fly {map_card_dest}"), HasAll(*world.logic.map_card_fly_unlocks))
 
-    def fly_unlock_rule(fr):
-        if world.options.randomize_fly_unlocks:
-            return Has(f"Fly {fr.name}")
-        return Has(f"EVENT_VISITED_{fr.base_identifier}")
+    def fly_unlock_rule(fr, flypoint):
+        items = [f"Fly {data.fly_regions[flypoint - 1].name}", f"Fly Unlock {flypoint}"]
+        if not world.options.randomize_fly_unlocks:
+            items.append(f"EVENT_VISITED_{fr.base_identifier}")
+        return HasAny(*items)
 
     # Fly Unlocks
-    if not world.options.randomize_fly_destinations:
-        for fly_region in get_fly_regions(world):
-            set_rule(get_entrance(f"REGION_FLY -> {fly_region.exit_region}"), fly_unlock_rule(fly_region))
-
     if world.options.randomize_fly_destinations:
         for i, fly_region in enumerate(get_fly_regions(world), start=1):
-            if i == SILVER_CAVE_FLY_INDEX and \
-                    world.options.randomize_fly_unlocks.value == RandomizeFlyUnlocks.option_exclude_silver_cave and \
-                    world.options.johto_only.value != JohtoOnly.option_on:
-                rule = Has(f"Fly Silver Cave")
-            elif world.options.randomize_fly_unlocks:
-                rule = Has(f"Fly Unlock {i}")
-            else:
-                rule = fly_unlock_rule(fly_region)
-            set_rule(get_entrance(f"Fly Destination {i}"), rule)
+            set_rule(get_entrance(f"Fly Destination {i}"), fly_unlock_rule(fly_region, i))
+    else:
+        for fly_region in get_fly_regions(world):
+            set_rule(get_entrance(f"REGION_FLY -> {fly_region.exit_region}"), fly_unlock_rule(fly_region, fly_region.id))
 
     # New Bark Town
     set_rule(get_entrance("REGION_NEW_BARK_TOWN -> REGION_ROUTE_27:WEST"), CanUseHM(CanUseHM.SURF))
