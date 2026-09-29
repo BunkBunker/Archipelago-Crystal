@@ -408,7 +408,7 @@ class BattleTowerSanity(Choice):
     of whichever tier they are shuffled into for the seed.
 
     WARNING: The Battle Tower is legit. Your team will be levelled down to match your tier, if needed. You cannot
-    use items and the trainers have the best possible AI. Bringing in Pokemon with >= 600 BST requires the Battle Tower
+    use items from your bag, held items must all be different and the trainers have the best possible AI. Bringing in Pokemon with >= 600 BST requires the Battle Tower
     Uber Pass, which will be shuffled into the item pool.
     """
     display_name = "Battle Tower Sanity"
@@ -2988,9 +2988,9 @@ class CoupledEntrances(DefaultOnToggle):
     """
     If enabled, entrance randomization is coupled: if door A leads to location B,
     then the exit of location B leads back to door A. Recommended for navigation.
-    If disabled, exits are randomized independently (uncoupled).
+    If disabled, exits are randomized independently.
 
-    Has no effect on Holes entrances (always decoupled).
+    Has no effect on one way entrances.
     """
     display_name = "Coupled Entrances"
 
