@@ -995,6 +995,15 @@ def set_rules(world: "PokemonCrystalWorld") -> None:
         set_rule(get_entrance("REGION_OLIVINE_PORT -> REGION_OLIVINE_PORT:TICKET"), world.logic.ship_rule())
         set_rule(get_entrance("REGION_FAST_SHIP_1F -> REGION_OLIVINE_PORT:TICKET"), Has("EVENT_FAST_SHIP_LAZY_SAILOR"))
 
+        for trainer in ("PSYCHIC_RODNEY", "SUPER_NERD_SHAWN", "BEAUTY_CASSIE", "COOLTRAINERM_SEAN",
+                        "COOLTRAINERF_CAROL", "GENTLEMAN_EDWARD", "SAILOR_GARRETT", "FISHER_JONAH", "BLACKBELT_WAI",
+                        "POKEFANM_JEREMY", "POKEFANF_GEORGIA", "BUG_CATCHER_KEN", "GUITARIST_CLYDE",
+                        "POKEMANIAC_ETHAN", "BURGLAR_COREY", "SAILOR_KENNETH", "TEACHER_SHIRLEY", "SCHOOLBOY_NATE",
+                        "SCHOOLBOY_RICKY"):
+            safe_set_location_rule(f"ITEM_FROM_{trainer}", Has("EVENT_FAST_SHIP_LAZY_SAILOR"))
+            if world.options.level_scaling:
+                safe_set_location_rule(trainer, Has("EVENT_FAST_SHIP_LAZY_SAILOR"))
+
         if hidden():
             set_rule(get_location("Olivine Port - Hidden Item in Buoy"), CanUseHM(CanUseHM.SURF))
 
