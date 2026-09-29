@@ -1845,6 +1845,8 @@ def generate_output(world: "PokemonCrystalWorld", output_directory: str, patch: 
         for index, map_const, x, y in POKECENTER_SPAWN_ENTRIES:
             group, map_id = data.map_constants[map_const]
             write_bytes([group, map_id, x, y], post_flypoint_base + index * 4)
+        # sight range 0: spotting the player from behind the boulder softlocks the Kurt scene
+        write_bytes([0], data.rom_addresses["AP_Setting_SlowpokeWell_GruntM1"] + 8)
 
     if world.options.randomize_fly_unlocks or world.options.randomize_fly_destinations:
         write_bytes([1], data.rom_addresses["AP_Setting_FlyUnlocksShuffled"] + 2)
