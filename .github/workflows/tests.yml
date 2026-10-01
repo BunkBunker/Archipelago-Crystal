@@ -10,7 +10,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     env:
-      AP_TEST_WORLDS: pokemon_crystal_prerelease
+      AP_TEST_WORLDS: pokemon_crystal
     steps:
       - uses: actions/checkout@v4
 

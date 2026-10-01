@@ -34,7 +34,7 @@ class FlyDestinationsVanillaUnlocksTest(PokemonCrystalTestBase):
             tokens[offset] = bytes(payload)
 
         with tempfile.TemporaryDirectory() as tmp, \
-                mock_patch("worlds.pokemon_crystal_prerelease.rom.PokemonCrystalProcedurePatch.write_token", capture):
+                mock_patch("worlds.pokemon_crystal.rom.PokemonCrystalProcedurePatch.write_token", capture):
             self.world.generate_output(tmp)
 
         table = data.rom_addresses["AP_Setting_FlagItems_Table_Events"]

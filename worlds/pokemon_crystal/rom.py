@@ -258,7 +258,7 @@ class PokemonCrystalAPPatchExtension(APPatchExtension):
 class PokemonCrystalProcedurePatch(APProcedurePatch, APTokenMixin):
     game = data.manifest.game
     hash = [CRYSTAL_1_0_HASH, CRYSTAL_1_1_HASH]
-    patch_file_ending = ".apcrystalpre"
+    patch_file_ending = ".apcrystal"
     result_file_ending = ".gbc"
     world_version: Version | None = None
     minimum_world_version: Version | None = None

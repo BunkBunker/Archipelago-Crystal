@@ -250,7 +250,7 @@ class TestWonderTradeSendFinally(unittest.IsolatedAsyncioTestCase):
     next offer can post."""
 
     async def test_in_flight_clears_when_acquire_returns_none(self):
-        from worlds.pokemon_crystal_prerelease.client import PokemonCrystalClient
+        from worlds.pokemon_crystal.client import PokemonCrystalClient
 
         # Hand-roll just enough of the client to exercise wonder_trade_send's
         # try/finally without bringing up the full BizHawk stack.
@@ -265,7 +265,7 @@ class TestWonderTradeSendFinally(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(client.wonder_trade_in_flight)
 
     async def test_in_flight_clears_when_acquire_raises(self):
-        from worlds.pokemon_crystal_prerelease.client import PokemonCrystalClient
+        from worlds.pokemon_crystal.client import PokemonCrystalClient
 
         client = PokemonCrystalClient.__new__(PokemonCrystalClient)
         client.wonder_trade_in_flight = True

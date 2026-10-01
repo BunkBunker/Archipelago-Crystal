@@ -62,7 +62,7 @@ class SkipEliteFourNonLeagueERTest(PokemonCrystalTestBase):
             tokens[offset] = bytes(payload)
 
         with tempfile.TemporaryDirectory() as tmp, \
-                mock_patch("worlds.pokemon_crystal_prerelease.rom.PokemonCrystalProcedurePatch.write_token", capture):
+                mock_patch("worlds.pokemon_crystal.rom.PokemonCrystalProcedurePatch.write_token", capture):
             self.world.generate_output(tmp)
 
         gate = bytes([4, *data.map_constants["INDIGO_PLATEAU_POKECENTER_1F"]])

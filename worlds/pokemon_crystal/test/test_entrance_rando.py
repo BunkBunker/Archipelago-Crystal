@@ -591,7 +591,7 @@ class ERBipartitePoolIsolationTest(PokemonCrystalTestBase):
         doors facing the same way, One-Ways still shuffle only among themselves, and the
         whole pool places without falling back to vanilla pins."""
         import logging
-        import worlds.pokemon_crystal_prerelease.entrance_rando as crystal_er
+        import worlds.pokemon_crystal.entrance_rando as crystal_er
 
         self.options = {
             "randomize_entrances": _ALL_CATEGORIES,
@@ -762,7 +762,7 @@ class ERUnsolvableIsolationRaisesTest(PokemonCrystalTestBase):
 
         import entrance_rando
         from entrance_rando import EntranceRandomizationError
-        import worlds.pokemon_crystal_prerelease.world as crystal_world
+        import worlds.pokemon_crystal.world as crystal_world
 
         def always_fail(world, *, coupled, target_group_lookup, preserve_group_order):
             raise EntranceRandomizationError("forced failure")
@@ -840,7 +840,7 @@ class ERIsolatedPinFallbackTest(PokemonCrystalTestBase):
 
         import entrance_rando
         from entrance_rando import EntranceRandomizationError
-        import worlds.pokemon_crystal_prerelease.entrance_rando as crystal_er
+        import worlds.pokemon_crystal.entrance_rando as crystal_er
 
         real_randomize = entrance_rando.randomize_entrances
         pool_size = {"n": None}

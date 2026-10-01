@@ -1,8 +1,8 @@
 # Pokémon Crystal
 
 ## Game page in other languages:
-* [Français](/games/Pokemon%20Crystal%20Prerelease/info/fr)
-* [Polski](/games/Pokemon%20Crystal%20Prerelease/info/pl)
+* [Français](/games/Pokemon%20Crystal/info/fr)
+* [Polski](/games/Pokemon%20Crystal/info/pl)
 
 ## What does randomization do to this game?
 

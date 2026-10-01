@@ -38,7 +38,7 @@ class FlyDestinationsFreeFlyJohtoOnlyTest(PokemonCrystalTestBase):
             tokens[offset] = bytes(payload)
 
         with tempfile.TemporaryDirectory() as tmp, \
-                mock_patch("worlds.pokemon_crystal_prerelease.rom.PokemonCrystalProcedurePatch.write_token", capture):
+                mock_patch("worlds.pokemon_crystal.rom.PokemonCrystalProcedurePatch.write_token", capture):
             self.world.generate_output(tmp)
 
         free_fly_flag = fly_flag_index(self.world, self.world.free_fly_location)
