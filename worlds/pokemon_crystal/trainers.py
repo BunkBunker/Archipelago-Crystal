@@ -153,7 +153,7 @@ def boost_trainer_pokemon(world: "PokemonCrystalWorld"):
                 if new_level > 100: new_level = 100
             elif world.options.boost_trainers == BoostTrainerPokemonLevels.option_set_min_level:
                 if new_level < world.options.trainer_level_boost:
-                    new_level = world.options.trainer_level_boost
+                    new_level = world.options.trainer_level_boost.value
             new_party.append(replace(trainer_mon, level=new_level))
         world.generated_trainers[trainer_name] = replace(
             world.generated_trainers[trainer_name],
