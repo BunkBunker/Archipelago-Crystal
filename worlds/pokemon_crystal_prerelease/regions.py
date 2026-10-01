@@ -87,8 +87,7 @@ def _generate_curve_levels(n: int, min_level: int, max_level: int, shape: int) -
         return []
     if n == 1:
         return [min_level]
-    lo, hi = min(min_level, max_level), max(min_level, max_level)
-    span = hi - lo
+    span = max_level - min_level
     levels = []
     for i in range(n):
         t = i / (n - 1)
@@ -98,7 +97,7 @@ def _generate_curve_levels(n: int, min_level: int, max_level: int, shape: int) -
             t = t ** 2
         elif shape == LevelCurve.option_s_curve:
             t = t * t * (3 - 2 * t)  # smoothstep
-        levels.append(round(lo + span * t))
+        levels.append(round(min_level + span * t))
     return levels
 
 

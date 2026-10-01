@@ -47,6 +47,7 @@ def __adjust_option_problems(world: "PokemonCrystalWorld"):
     __adjust_options_traps(world)
     __adjust_options_mischief_bounds(world)
     __adjust_options_level_scaling(world)
+    __adjust_options_level_curve_bounds(world)
     __adjust_options_fly_destination_rando(world)
     __adjust_options_start_time(world)
     __adjust_options_kinda_early_surf(world)
@@ -504,6 +505,17 @@ def __adjust_options_level_scaling(world: "PokemonCrystalWorld"):
             "Pokemon Crystal: Lock Kanto Gyms is incompatible with Level Scaling. "
             "Disabling Lock Kanto Gyms for player %s.",
             world.player_name)
+
+
+def __adjust_options_level_curve_bounds(world: "PokemonCrystalWorld"):
+    min_level = world.options.level_curve_min_level
+    max_level = world.options.level_curve_max_level
+    if min_level.value > max_level.value:
+        min_level.value, max_level.value = max_level.value, min_level.value
+        logging.warning("Pokemon Crystal: Swapped level curve min and max levels for player %s (%s)",
+                        world.player,
+                        world.player_name
+                        )
 
 
 def __adjust_options_fly_destination_rando(world: "PokemonCrystalWorld"):
