@@ -3,6 +3,7 @@
   "authors": [
     "gerbiljames"
   ],
-  "minimum_ap_version": "0.6.3",
-  "world_version": "5.4.6"
+  "minimum_ap_version": "0.6.7",
+  "world_version": "6.0.1",
+  "minimum_patch_version": "6.0.0"
 }
