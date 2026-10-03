@@ -1212,7 +1212,7 @@ class FlyDestinationPlando(WeightedOptionDict):
     Pins one or more fly unlock to a specific warp or map.
 
     You can find a guide to accepted values and formatting at:
-    https://github.com/gerbiljames/Archipelago-Crystal/blob/pokecrystal/worlds/pokemon_crystal/docs/fly_plando.md
+    https://github.com/gerbiljames/Archipelago-Crystal/blob/pokecrystal-develop/worlds/pokemon_crystal/docs/fly_plando.md
     """
     KEY_PREFIX = "Fly Destination "
     display_name = "Fly Destination Plando"
