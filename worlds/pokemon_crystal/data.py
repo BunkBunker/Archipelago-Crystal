@@ -1733,6 +1733,9 @@ def _init() -> None:
         name: tuple(pair) for name, pair in data_json["map_constants"].items()
     }
 
+    # extracted from vanilla blks; rom.py paints these warp tiles at generation
+    PATCHED_WARP_TYPES = {("CherrygroveCity", 6): "CAVE"}
+
     flypoints: dict[Landmark, list[FlypointWarp]] = defaultdict(list)
     for map_name, map_data in maps.items():
         if data_json["warps"].get(map_name, None) is None: continue
@@ -1740,7 +1743,8 @@ def _init() -> None:
                                                          warp["index"],
                                                          warp["x"],
                                                          warp["y"],
-                                                         warp["warp_type"]
+                                                         PATCHED_WARP_TYPES.get((map_name, warp["index"]),
+                                                                                warp["warp_type"])
                                                          )
                                             for warp in data_json["warps"][map_name]
                                             if map_data.environment in OUTDOOR_ENVIRONMENTS
