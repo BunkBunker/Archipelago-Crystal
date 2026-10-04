@@ -775,6 +775,8 @@ class MapEnvironment(IntEnum):
         raise ValueError(f"Invalid map environment string: {map_env_string}")
 
 
+HM_COMPAT_TMS = ["HEADBUTT", "ROCK_SMASH"]
+
 # Maps the player walks around on outdoors. Everything else is inside a building,
 # cave or gate, which is what tells the two sides of a door apart.
 OUTDOOR_ENVIRONMENTS = frozenset({MapEnvironment.Town, MapEnvironment.Route})
